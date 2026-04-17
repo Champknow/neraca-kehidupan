@@ -653,18 +653,28 @@ elif menu == "📋 Transaksi":
         with st.form("form_transaksi"):
             trans_type = st.radio("Tipe Transaksi", ["Pemasukan", "Pengeluaran"], horizontal=True)
             list_cat = df_cat[df_cat['type'] == trans_type]['name'].tolist()
+            
             if not list_cat:
-                st.error(f"Belum ada kategori untuk tipe {trans_type}. Tambahkan di menu Anggaran.")
+                st.error(f"⚠️ Belum ada kategori untuk tipe {trans_type}. Silakan tambahkan di menu Anggaran terlebih dahulu.")
+                category = None
+                amount = None
+                date = None
+                note = None
             else:
                 category = st.selectbox("Kategori", list_cat)
                 amount = st.number_input("Jumlah (Rp)", min_value=1000, step=1000, value=10000)
                 date = st.date_input("Tanggal", value=datetime.now().date())
                 note = st.text_input("Catatan (Opsional)")
-                submitted = st.form_submit_button("💾 Simpan Transaksi")
-                if submitted:
+            
+            # Submit button selalu ada di luar blok if, tapi hanya diproses jika kategori tersedia
+            submitted = st.form_submit_button("💾 Simpan Transaksi")
+            if submitted:
+                if list_cat:
                     save_transaction(trans_type, category, amount, date, note)
                     st.success(f"Transaksi {trans_type} sebesar Rp {amount:,.0f} berhasil disimpan!")
                     st.balloons()
+                else:
+                    st.error("Tidak dapat menyimpan transaksi karena kategori belum tersedia.")
 
 elif menu == "📊 Anggaran":
     st.title("Kelola Kategori & Anggaran")
